@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Header Fixer 设置</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body class="options-mode">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">H</div>
+          <div>
+            <h1>Header Fixer</h1>
+            <p>管理自定义请求头规则 · 规则保存在本地，对所有标签页生效</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="status" id="status">
+        <span class="dot off" id="status-dot"></span>
+        <span id="status-text">加载中…</span>
+        <span class="sep">·</span>
+        <span class="mono" id="status-url" title="当前标签页">—</span>
+      </div>
+
+      <main class="content" id="content"></main>
+
+      <footer class="footer">
+        <div class="footer-row">
+          <button class="btn btn-primary btn-block" id="btn-add">＋ 添加规则</button>
+        </div>
+        <div class="footer-row">
+          <button class="btn btn-ghost" id="btn-import">导入 JSON</button>
+          <button class="btn btn-ghost" id="btn-export">导出 JSON</button>
+          <button class="btn btn-ghost" id="btn-clear">清空全部</button>
+        </div>
+        <input type="file" id="file-import" accept="application/json,.json" hidden />
+      </footer>
+    </div>
+
+    <div class="modal-backdrop" id="modal">
+      <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-head">
+          <h2 id="modal-title">添加规则</h2>
+          <button class="icon-btn" id="modal-close" title="关闭">
+            <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label for="f-name">规则名称</label>
+            <input type="text" id="f-name" placeholder="例如：测试环境 Token" />
+          </div>
+
+          <div class="section-title">匹配目标</div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f-match-type">匹配方式</label>
+              <select id="f-match-type">
+                <option value="contains">包含</option>
+                <option value="startsWith">开头是</option>
+                <option value="domain">域名（含子域）</option>
+                <option value="exact">完整 URL</option>
+                <option value="regex">正则</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-use-current">快捷填入</label>
+              <button class="btn btn-ghost" id="f-use-current" type="button">使用当前页面 URL</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-pattern">匹配内容</label>
+            <input type="text" id="f-pattern" placeholder="例如：api.example.com" />
+            <div class="hint" id="f-pattern-hint"></div>
+          </div>
+
+          <div class="section-title">请求头</div>
+          <div id="headers-box"></div>
+          <button class="btn btn-ghost btn-sm" id="btn-add-header" type="button">＋ 添加请求头</button>
+
+          <div class="section-title">生效范围（不选 = 全部）</div>
+          <div class="chips" id="resource-chips"></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" id="btn-cancel">取消</button>
+          <button class="btn btn-primary" id="btn-save">保存规则</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="shared.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

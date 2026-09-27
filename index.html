@@ -1,0 +1,441 @@
+<!-- AI生成 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Header Fixer — Chrome 自定义请求头扩展</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --card: #18233d;
+      --ink: #eef2ff;
+      --muted: #93a0c2;
+      --line: #243356;
+      --accent: #6ea8ff;
+      --accent2: #8b5cf6;
+      --ok: #4ade80;
+      --code: #0a1224;
+      --font: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(110,168,255,.18), transparent 55%),
+        radial-gradient(900px 500px at 90% 0%, rgba(139,92,246,.16), transparent 50%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #2563eb, #7c3aed);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 24px;
+      box-shadow: 0 12px 32px rgba(37,99,235,.35);
+      flex-shrink: 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: -0.02em;
+      font-weight: 750;
+    }
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .hero {
+      margin: 28px 0 36px;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      h1 { font-size: 28px; }
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 24px;
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .card p { margin: 0 0 12px; color: var(--muted); }
+    .features {
+      display: grid;
+      gap: 12px;
+    }
+    .feat {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .feat .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      flex-shrink: 0;
+    }
+    .feat strong { display: block; margin-bottom: 2px; }
+    .feat span { color: var(--muted); font-size: 13px; }
+
+    .preview {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.35);
+    }
+    .preview .bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    .preview .bar .d {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #334155;
+    }
+    .preview .bar .d:nth-child(1) { background: #f87171; }
+    .preview .bar .d:nth-child(2) { background: #fbbf24; }
+    .preview .bar .d:nth-child(3) { background: #34d399; }
+    .preview .bar .t {
+      margin-left: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    .preview .body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .mock-rule {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .mock-rule .r1 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .sw {
+      width: 36px; height: 20px; border-radius: 999px;
+      background: var(--accent);
+      position: relative;
+    }
+    .sw::after {
+      content: "";
+      position: absolute;
+      width: 14px; height: 14px;
+      right: 3px; top: 3px;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .mock-rule .name { font-weight: 650; font-size: 13px; }
+    .mock-rule .meta { color: var(--muted); font-size: 11px; font-family: var(--mono); }
+    .hrow {
+      display: grid;
+      grid-template-columns: 42px 1.1fr 1.3fr;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      background: rgba(0,0,0,.22);
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+    .hrow .op { color: var(--accent); font-weight: 700; }
+    .hrow .v { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .steps li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .steps li::before {
+      content: counter(step);
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(110,168,255,.15);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+    .steps code, .inline-code {
+      font-family: var(--mono);
+      background: var(--code);
+      border: 1px solid var(--line);
+      padding: 1px 7px;
+      border-radius: 6px;
+      font-size: 12.5px;
+    }
+    pre {
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      overflow: auto;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #c9d7ff;
+      margin: 0;
+    }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(110,168,255,.12);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      margin: 0 6px 6px 0;
+    }
+    .warn {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(251,191,36,.08);
+      border: 1px solid rgba(251,191,36,.25);
+      color: #fbbf24;
+      font-size: 13px;
+    }
+    .footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<p data-aigc-mark="1" style="margin:0 0 8px;font-size:10px;line-height:1.3;color:#6b6560;font-weight:400;">AI生成</p>
+
+  <div class="wrap">
+    <header>
+      <div class="logo">H</div>
+      <div>
+        <h1>Header Fixer</h1>
+        <p class="sub">Chrome 浏览器扩展 · 访问指定网址时，固定添加任意自定义请求头</p>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="card">
+        <h2>能做什么</h2>
+        <div class="features">
+          <div class="feat">
+            <div class="dot"></div>
+            <div>
+              <strong>按网址规则注入请求头</strong>
+              <span>支持「包含 / 开头是 / 域名 / 完整 URL / 正则」五种匹配方式</span>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="dot"></div>
+            <div>
+              <strong>任意自定义 Header</strong>
+              <span>可覆盖设置、追加，或删除指定请求头；一条规则可挂多个 Header</span>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="dot"></div>
+            <div>
+              <strong>一键启停 · 本地持久化</strong>
+              <span>规则存在 chrome.storage，重启浏览器后自动生效</span>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="dot"></div>
+            <div>
+              <strong>导入 / 导出 JSON</strong>
+              <span>方便在多台机器之间同步规则，或版本管理</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <span class="tag">Manifest V3</span>
+          <span class="tag">declarativeNetRequest</span>
+          <span class="tag">无远程代码</span>
+          <span class="tag">弹窗 + 设置页</span>
+        </div>
+      </div>
+
+      <div class="preview" aria-label="界面预览">
+        <div class="bar">
+          <div class="d"></div><div class="d"></div><div class="d"></div>
+          <div class="t">popup.html</div>
+        </div>
+        <div class="body">
+          <div class="mock-rule">
+            <div class="r1">
+              <div class="sw"></div>
+              <div>
+                <div class="name">测试环境 Token</div>
+                <div class="meta">域名 · api.example.com</div>
+              </div>
+            </div>
+            <div class="hrow"><span class="op">SET</span><span>Authorization</span><span class="v">Bearer eyJhbGciOi…</span></div>
+            <div class="hrow"><span class="op">SET</span><span>X-Env</span><span class="v">staging</span></div>
+            <div class="hrow"><span class="op">DEL</span><span>X-Request-Id</span><span class="v">（删除）</span></div>
+          </div>
+          <div class="mock-rule" style="opacity:.55">
+            <div class="r1">
+              <div class="sw" style="background:#475569"></div>
+              <div>
+                <div class="name">内网调试头</div>
+                <div class="meta">包含 · localhost:8080</div>
+              </div>
+            </div>
+            <div class="hrow"><span class="op">SET</span><span>X-Debug</span><span class="v">1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>安装步骤</h2>
+        <ol class="steps">
+          <li>
+            <div>
+              打开 Chrome 扩展管理页：<br />
+              <code>chrome://extensions</code>
+            </div>
+          </li>
+          <li>
+            <div>
+              打开右上角「开发者模式」
+            </div>
+          </li>
+          <li>
+            <div>
+              点「加载已解压的扩展程序」，选择本目录下的
+              <code>header-fixer/</code> 文件夹
+            </div>
+          </li>
+          <li>
+            <div>
+              工具栏点开扩展图标，即可添加规则；也可点齿轮进入设置页
+            </div>
+          </li>
+        </ol>
+        <div class="warn">
+          修改请求头会影响真实网络请求。请仅在你有权测试/调试的站点上使用，不要用于伪造身份或绕过安全控制。
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>匹配方式说明</h2>
+        <pre>包含      URL 中出现关键词
+          例：api.example.com
+
+开头是    URL 以指定前缀开头
+          例：https://api.example.com/
+
+域名      匹配该域名及所有子域
+          例：example.com
+
+完整 URL  精确匹配一个地址
+          例：https://api.example.com/v1/me
+
+正则      Chrome DNR 正则语法
+          例：^https://api\.example\.com/</pre>
+        <p style="margin-top:12px">
+          「生效范围」可限制只改 XHR/Fetch、WebSocket 或页面主文档等资源类型；不勾选则全部请求都改。
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>规则 JSON 示例</h2>
+      <pre>{
+  "version": 1,
+  "rules": [
+    {
+      "id": "r_demo",
+      "enabled": true,
+      "name": "测试环境 Token",
+      "matchType": "domain",
+      "pattern": "api.example.com",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer xxx", "operation": "set" },
+        { "name": "X-Env", "value": "staging", "operation": "set" }
+      ],
+      "resourceTypes": ["xmlhttprequest", "websocket", "main_frame"]
+    }
+  ]
+}</pre>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>目录结构</h2>
+      <pre>header-fixer/
+├── manifest.json     清单（MV3）
+├── background.js     Service Worker，同步 DNR 规则
+├── shared.js         规则模型与 declarativeNetRequest 转换
+├── app.js            弹窗 / 设置页交互逻辑
+├── popup.html/css    工具栏弹窗
+├── options.html      独立设置页（同 app.js）
+└── icons/            16/32/48/128 图标</pre>
+    </div>
+
+    <div class="footer">
+      Header Fixer · 本地运行，不收集任何数据 · 仅供授权调试与开发使用
+    </div>
+  </div>
+</body>
+</html>
